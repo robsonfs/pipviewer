@@ -1,7 +1,17 @@
 use std::env;
-use std::io::{self, ErrorKind, Result, Read, Write};
+use std::io::{self, ErrorKind, Read, Result, Write};
 
 const CHUNK_SIZE: usize = 16 * 1024;
+
+fn silent_behave(silent: bool, total_bytes: usize, new_line: bool) {
+    if !silent {
+        if new_line {
+            eprintln!("\r{}", total_bytes);
+        } else {
+            eprint!("\r{}", total_bytes);
+        }
+    }
+}
 
 fn main() -> Result<()> {
     let silent = !env::var("PV_SILENT").unwrap_or_default().is_empty();
@@ -14,9 +24,7 @@ fn main() -> Result<()> {
             Err(_) => break,
         };
         total_bytes += num_read;
-        if !silent {
-            eprint!("\r{}", total_bytes);
-        }
+        silent_behave(silent, total_bytes, false);
         if let Err(e) = io::stdout().write_all(&buffer[..num_read]) {
             if e.kind() == ErrorKind::BrokenPipe {
                 break;
@@ -24,8 +32,6 @@ fn main() -> Result<()> {
             return Err(e);
         }
     }
-    if !silent {
-        eprintln!("\r{}", total_bytes);
-    }
+    silent_behave(silent, total_bytes, true);
     Ok(())
 }
