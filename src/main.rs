@@ -1,18 +1,11 @@
+mod utils;
+
 use clap::{App, Arg};
 use std::env;
 use std::io::{self, ErrorKind, Read, Result, Write};
+use utils::silent_behave;
 
 const CHUNK_SIZE: usize = 16 * 1024;
-
-fn silent_behave(silent: bool, total_bytes: usize, new_line: bool) {
-    if !silent {
-        if new_line {
-            eprintln!("\r{}", total_bytes);
-        } else {
-            eprint!("\r{}", total_bytes);
-        }
-    }
-}
 
 fn main() -> Result<()> {
     let matches = App::new("pipeviewer")
